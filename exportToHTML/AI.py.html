@@ -1,0 +1,91 @@
+<html>
+<head>
+<title>AI.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6a8759;}
+.s3 { color: #6897bb;}
+.s4 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+AI.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">cv2</span>
+<span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np</span>
+<span class="s0">import </span><span class="s1">time</span>
+
+<span class="s1">frame = cv2.imread(</span><span class="s2">&quot;Images/download (2).jpg&quot;</span><span class="s1">)</span>
+<span class="s1">image = cv2.imread(</span><span class="s2">&quot;Images/20180722_170202.jpg&quot;</span><span class="s1">)</span>
+
+<span class="s1">image = cv2.resize(image</span><span class="s0">, </span><span class="s1">(</span><span class="s3">700</span><span class="s0">, </span><span class="s3">380</span><span class="s1">))</span>
+<span class="s1">frame = cv2.resize(frame</span><span class="s0">, </span><span class="s1">(</span><span class="s3">700</span><span class="s0">, </span><span class="s3">380</span><span class="s1">))</span>
+
+<span class="s4"># u_green = np.array([180, 180, 80])</span>
+<span class="s4"># l_green = np.array([0, 0, 0])</span>
+<span class="s4">#</span>
+<span class="s4"># mask = cv2.inRange(image, l_green, u_green)</span>
+<span class="s4"># res = cv2.bitwise_and(image, image, mask=mask)</span>
+<span class="s4">#</span>
+<span class="s4"># f = image - res</span>
+<span class="s4"># f = np.where(f == 0, frame, f)</span>
+<span class="s4">#</span>
+<span class="s4"># cv2.imshow(&quot;edges_copy&quot;, f)</span>
+<span class="s4"># cv2.waitKey(0)</span>
+
+<span class="s1">gray = cv2.cvtColor(image</span><span class="s0">, </span><span class="s1">cv2.COLOR_BGR2GRAY)</span>
+<span class="s1">kernel_size = </span><span class="s3">5</span>
+<span class="s1">blur_gray = cv2.GaussianBlur(gray</span><span class="s0">, </span><span class="s1">(kernel_size</span><span class="s0">, </span><span class="s1">kernel_size)</span><span class="s0">, </span><span class="s3">0</span><span class="s1">)</span>
+
+<span class="s1">edges = cv2.Canny(blur_gray</span><span class="s0">, </span><span class="s3">150</span><span class="s0">, </span><span class="s3">300</span><span class="s0">, </span><span class="s1">apertureSize=</span><span class="s3">3</span><span class="s1">)</span>
+<span class="s1">print(edges.shape)</span>
+<span class="s1">edges_copy = edges[</span><span class="s3">100</span><span class="s1">:</span><span class="s3">299</span><span class="s0">, </span><span class="s3">300</span><span class="s1">:</span><span class="s3">610</span><span class="s1">]</span>
+
+<span class="s4"># imshape = image.shape</span>
+<span class="s4"># vertices = np.array([[(0, imshape[0]), (300, 100), (400, 100), (imshape[1], imshape[0])]], dtype=np.int32)</span>
+<span class="s4"># cv2.fillPoly(mask, vertices, (100, 100, 100))</span>
+<span class="s4"># masked_edges = cv2.bitwise_and(edges, mask)</span>
+
+<span class="s4"># contours, hierarchy = cv2.findContours(edges_copy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)</span>
+<span class="s4"># cv2.drawContours(image, contours, -1, (0, 0, 255), 2)</span>
+
+<span class="s1">lines = cv2.HoughLinesP(</span>
+    <span class="s1">edges</span><span class="s0">,  </span><span class="s4"># Input edge image</span>
+    <span class="s3">2</span><span class="s0">,  </span><span class="s4"># Distance resolution in pixels</span>
+    <span class="s1">np.pi / </span><span class="s3">800</span><span class="s0">,  </span><span class="s4"># Angle resolution in radians</span>
+    <span class="s1">threshold=</span><span class="s3">100</span><span class="s0">,  </span><span class="s4"># Min number of votes for valid line</span>
+    <span class="s1">minLineLength=</span><span class="s3">8</span><span class="s0">,  </span><span class="s4"># Min allowed length of line</span>
+    <span class="s1">maxLineGap=</span><span class="s3">10  </span><span class="s4"># Max allowed gap between line for joining them</span>
+<span class="s1">)</span>
+
+<span class="s1">line_image = np.copy(image) * </span><span class="s3">0</span>
+<span class="s1">lines_list = []</span>
+<span class="s4"># Iterate over points</span>
+<span class="s0">for </span><span class="s1">points </span><span class="s0">in </span><span class="s1">lines:</span>
+    <span class="s4"># Extracted points nested in the list</span>
+    <span class="s1">x1</span><span class="s0">, </span><span class="s1">y1</span><span class="s0">, </span><span class="s1">x2</span><span class="s0">, </span><span class="s1">y2 = points[</span><span class="s3">0</span><span class="s1">]</span>
+    <span class="s4"># Draw the lines joing the points</span>
+    <span class="s4"># On the original image</span>
+    <span class="s1">cv2.line(line_image</span><span class="s0">, </span><span class="s1">(x1</span><span class="s0">, </span><span class="s1">y1)</span><span class="s0">, </span><span class="s1">(x2</span><span class="s0">, </span><span class="s1">y2)</span><span class="s0">, </span><span class="s1">(</span><span class="s3">255</span><span class="s0">, </span><span class="s3">0</span><span class="s0">, </span><span class="s3">0</span><span class="s1">)</span><span class="s0">, </span><span class="s3">5</span><span class="s1">)</span>
+    <span class="s4"># Maintain a simples lookup list for points</span>
+    <span class="s1">lines_list.append([(x1</span><span class="s0">, </span><span class="s1">y1)</span><span class="s0">, </span><span class="s1">(x2</span><span class="s0">, </span><span class="s1">y2)])</span>
+
+<span class="s1">lines_edges = cv2.addWeighted(image</span><span class="s0">, </span><span class="s3">1</span><span class="s0">, </span><span class="s1">line_image</span><span class="s0">, </span><span class="s3">0.8</span><span class="s0">, </span><span class="s3">0</span><span class="s1">)</span>
+
+<span class="s4"># Save the result image</span>
+<span class="s1">cv2.imwrite(</span><span class="s2">'detectedLines.png'</span><span class="s0">, </span><span class="s1">lines_edges)</span>
+
+<span class="s1">cv2.imshow(</span><span class="s2">&quot;edges&quot;</span><span class="s0">, </span><span class="s1">edges)</span>
+<span class="s1">cv2.imshow(</span><span class="s2">&quot;edges_copy&quot;</span><span class="s0">, </span><span class="s1">lines_edges)</span>
+<span class="s1">cv2.imshow(</span><span class="s2">&quot;image&quot;</span><span class="s0">, </span><span class="s1">image)</span>
+<span class="s1">cv2.waitKey(</span><span class="s3">0</span><span class="s1">)</span>
+
+<span class="s1">cv2.destroyAllWindows()</span>
+</pre>
+</body>
+</html>
